@@ -4,6 +4,7 @@ import { Hub } from './hub/Hub';
 import { logger } from './utils/logger';
 
 const DEFAULT_PORT = Number(process.env.GW_PORT ?? 4100);
+const DEFAULT_HOST = process.env.GW_HOST ?? '0.0.0.0';
 
 export interface GatewayInstance {
   server: http.Server;
@@ -18,14 +19,19 @@ export function createGateway(): GatewayInstance {
   return { server, hub };
 }
 
-export async function startGateway(port: number = DEFAULT_PORT): Promise<GatewayInstance> {
+export async function startGateway(
+  port: number = DEFAULT_PORT,
+  host: string = DEFAULT_HOST,
+): Promise<GatewayInstance> {
   const instance = createGateway();
   await new Promise<void>((resolve, reject) => {
     instance.server.once('error', (error) => {
       reject(error);
     });
-    instance.server.listen(port, () => {
-      logger.info('gateway listening', { port });
+    instance.server.listen(port, host, () => {
+      const address = instance.server.address();
+      const actualPort = typeof address === 'object' && address ? address.port : port;
+      logger.info('gateway listening', { port: actualPort, host });
       resolve();
     });
   });

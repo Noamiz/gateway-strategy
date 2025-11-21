@@ -56,7 +56,11 @@ export class Router {
     const data = this.normalizeRaw(raw);
     const parsed = safeParse<unknown>(data);
     if (!parsed.ok) {
-      logger.warn('router.bad_json', { connectionId: ctx.id });
+      logger.warn('router.bad_json', {
+        connectionId: ctx.id,
+        error: parsed.error.message,
+        bytes: data.length,
+      });
       this.sendError(ctx, 'BAD_JSON', 'Unable to parse message');
       return;
     }
@@ -64,7 +68,12 @@ export class Router {
     const message = parsed.value;
     ctx.lastSeenAt = Date.now();
     const messageType = this.getMessageType(message);
-    logger.debug('router.message', { connectionId: ctx.id, type: messageType });
+    const messageGroup = (message as { groupId?: string } | undefined)?.groupId ?? ctx.groupId;
+    logger.debug('router.message', {
+      connectionId: ctx.id,
+      type: messageType,
+      groupId: messageGroup,
+    });
 
     if (this.isIdentify(message)) {
       this.handleIdentify(ctx, message);
@@ -93,6 +102,11 @@ export class Router {
     ctx.role = msg.payload.clientType;
     const incomingGroup = msg.payload.groupId;
     this.assignToGroup(ctx, incomingGroup);
+    logger.info('router.identify', {
+      connectionId: ctx.id,
+      role: ctx.role,
+      groupId: ctx.groupId,
+    });
 
     if (ctx.groupId) {
       const info = this.presence.set(ctx.groupId, {
@@ -119,6 +133,11 @@ export class Router {
       groupId,
       ts: msg.ts ?? Date.now(),
     };
+    logger.debug('router.data_update', {
+      connectionId: ctx.id,
+      groupId,
+      sessionId: msg.sessionId,
+    });
 
     if (groupId) {
       this.broadcastToGroup(groupId, envelope);
@@ -190,14 +209,25 @@ export class Router {
         sendJSON(ctx.ws, msg);
       }
     });
+    logger.debug('router.broadcast.group', {
+      groupId,
+      size: members?.size ?? 0,
+      type: (msg as { type?: string }).type,
+    });
   }
 
   private broadcastAll(msg: OutgoingToClient, excludeId?: string): void {
+    let delivered = 0;
     this.connections.forEach((connection, id) => {
       if (excludeId && excludeId === id) {
         return;
       }
       sendJSON(connection.ws, msg);
+      delivered += 1;
+    });
+    logger.debug('router.broadcast.all', {
+      delivered,
+      type: (msg as { type?: string }).type,
     });
   }
 
@@ -216,6 +246,7 @@ export class Router {
       },
     };
     sendJSON(ctx.ws, ready);
+    logger.debug('router.ready_sent', { connectionId: ctx.id, groupId: ctx.groupId });
   }
 
   private sendError(ctx: ConnectionContext, code: string, message: string): void {
@@ -229,6 +260,7 @@ export class Router {
       },
     };
     sendJSON(ctx.ws, envelope);
+    logger.warn('router.error_sent', { connectionId: ctx.id, code, groupId: ctx.groupId });
   }
 
   private normalizeRaw(raw: RawData): string {
@@ -245,9 +277,10 @@ export class Router {
   }
 
   private onClose(ctx: ConnectionContext): void {
+    const lastGroup = ctx.groupId;
     this.connections.delete(ctx.id);
     this.removeFromGroup(ctx);
-    logger.info('connection.closed', { connectionId: ctx.id });
+    logger.info('connection.closed', { connectionId: ctx.id, groupId: lastGroup });
   }
 
   private getMessageType(msg: unknown): string {

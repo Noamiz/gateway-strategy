@@ -24,7 +24,7 @@ describe('websocket basics', () => {
   let port: number | undefined;
 
   beforeEach(async () => {
-    instance = await startGateway(0);
+    instance = await startGateway(0, '127.0.0.1');
     const address = instance.server.address();
     if (!address || typeof address === 'string') {
       throw new Error('Unable to determine server port');
