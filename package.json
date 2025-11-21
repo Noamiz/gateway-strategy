@@ -1,0 +1,35 @@
+{
+  "name": "gateway-strategy",
+  "version": "1.0.0",
+  "description": "Realtime gateway for the End to End Company Products platform",
+  "main": "dist/server.js",
+  "repository": "git@github.com:Noamiz/gateway-strategy.git",
+  "author": "Noamiz <noamizrachi8@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/server.js",
+    "test": "vitest",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src --ext .ts"
+  },
+  "dependencies": {
+    "common-strategy": "git+ssh://git@github.com:Noamiz/common-strategy.git",
+    "express": "^5.1.0",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.10.1",
+    "@types/ws": "^8.18.1",
+    "@typescript-eslint/eslint-plugin": "^8.47.0",
+    "@typescript-eslint/parser": "^8.47.0",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.4",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.13"
+  }
+}

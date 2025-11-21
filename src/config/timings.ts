@@ -1,0 +1,3 @@
+export const HEARTBEAT_INTERVAL_MS = 10_000;
+export const HEARTBEAT_TIMEOUT_MS = 25_000;
+export const ORPHAN_SESSION_TTL_MS = 15_000;
