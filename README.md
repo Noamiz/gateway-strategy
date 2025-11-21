@@ -39,6 +39,13 @@ Node.js + TypeScript real-time gateway for the End to End Company Products syste
 - Example: `LOG_LEVEL=debug yarn dev` surfaces Router connection and broadcast traces, while `LOG_LEVEL=warn` suppresses informational chatter.
 - The logger also respects OS-level timestamps so collected logs can be piped into other processors or future structured loggers.
 
+## Docker & Nginx
+- Requirements: Docker Engine + the Docker Compose plugin.
+- Build and run: `docker compose build && docker compose up -d && docker compose ps`.
+- Nginx listens on `80` (HTTP/WS) and `443` (HTTPS/WSS), proxying traffic over the internal `gateway_net` bridge network to the Node process (`gateway:8080`).
+- TLS certificates must live at `infra/nginx/certs/fullchain.pem` and `infra/nginx/certs/privkey.pem`; for local dev, drop in self-signed certs or temporarily comment out the TLS server block to use port 80 only.
+- Typical deployment: DNS points to the Nginx host (NUC, LAN router, etc.); web/mobile clients connect with `wss://<hostname>/rt` while LAN peers can use `ws://<hostname>/rt` if plaintext is acceptable.
+
 ## Project Structure
 ```
 src/
