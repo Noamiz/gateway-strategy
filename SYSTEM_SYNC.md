@@ -79,7 +79,7 @@ Keep this section current when files move or new subsystems land so other agents
 - Install deps: `yarn install`.
 - Key scripts:
   - `yarn dev` – run `src/server.ts` via `ts-node-dev` (restarts on changes).
-  - `yarn dev:echo` – run the gateway *plus* the dev playground clients; ideal smoke test before committing.
+  - `yarn dev:echo` – run the gateway _plus_ the dev playground clients; ideal smoke test before committing.
   - `yarn build` – compile to `dist/` via `tsc -p tsconfig.build.json`.
   - `yarn start` – run the compiled server from `dist/server.js`.
   - `yarn test` – execute Vitest suites (uses supertest + in-memory ws clients).
@@ -116,7 +116,7 @@ If this file and Confluence disagree, **Confluence wins** and this file must be 
 
 ## 8. How Agents Should Use This
 
-- Assume all clients eventually import *shared* realtime contracts from `common-strategy`; avoid drifting local copies.
+- Assume all clients eventually import _shared_ realtime contracts from `common-strategy`; avoid drifting local copies.
 - When adding new signals or envelope fields, coordinate with `server-`, `web-`, `mobile-`, and `ai-strategy` so they stay compatible.
 - Keep Router logic stateless beyond in-memory maps; if persistence is needed, spec the change with `server-strategy` first.
 - Update this System Sync (and Confluence) whenever routes, message types, or deployment expectations change.
